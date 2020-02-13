@@ -1,0 +1,15 @@
+main: me.alexisevelyn.advancements_announcements.Main
+name: Custom_Advancement_Announcements
+version: 1.0
+api-version: 1.15
+author: Alexis Evelyn
+description: Replace Vanilla Advancement Announcements with PlaceHolderAPI Advancements
+
+depend: [PlaceholderAPI]
+
+commands:
+    announce-advancements:
+      description: An example command
+      usage: /announce-advancements
+      permission: myplugin.mycommand
+      permission-message: You don't have the myplugin.mycommand permission.
