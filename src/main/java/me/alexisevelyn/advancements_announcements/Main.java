@@ -8,16 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
-import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
 
 // Third Party Imports
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -25,8 +16,6 @@ import me.clip.placeholderapi.PlaceholderAPI;
 public class Main extends JavaPlugin implements Listener {
 	private boolean debug = true;
 	private boolean essentials = false;
-	
-	private ProtocolLibHandler plib = new ProtocolLibHandler();
 	
 	// Getters and Setters
 	
@@ -60,7 +49,8 @@ public class Main extends JavaPlugin implements Listener {
 			Bukkit.getPluginManager().registerEvents(this, this);
 			
 			// Register ProtocolLib Listeners
-			if(!plib.registerListeners(this)) {
+			ProtocolLibHandler plib = new ProtocolLibHandler();
+			if(!plib.registerListeners(this, getLogger())) {
 				throw new RuntimeException("Failed to Implement ProtocolLib Listeners!!! Submit a Bug Report!!!");
 			}
         } else {
@@ -92,30 +82,32 @@ public class Main extends JavaPlugin implements Listener {
 		Advancement advancement = event.getAdvancement();
 		String advancementMessage = ChatColor.WHITE + "%essentials_nickname%" + ChatColor.RESET + ChatColor.WHITE + " has made the advancement " + advancement.getKey().getKey() + ChatColor.RESET + ChatColor.WHITE + "!!!";
 		
+		// TODO: Figure out how to get the advancement name and description!
+		// TODO: Figure out how to determine if a message should be output to chat!
+		// Bonus points for figuring out how to cancel the vanilla message without /gamerule announceAdvancements
+		
 		// We parse the placeholders using "setPlaceholders"
 		advancementMessage = PlaceholderAPI.setPlaceholders(event.getPlayer(), advancementMessage);
 		
-		if(false) {
-			// Check if Advancement Gamerule is False.
-			// TODO: Do this per world for announcement.
-			// https://papermc.io/javadocs/paper/1.15/org/bukkit/GameRule.html#ANNOUNCE_ADVANCEMENTS
-			return;
-		}
+//		if(false) {
+//			// Check if Advancement Gamerule is False.
+//			// TODO: Do this per world for announcement.
+//			// https://papermc.io/javadocs/paper/1.15/org/bukkit/GameRule.html#ANNOUNCE_ADVANCEMENTS
+//			return;
+//		}
 		
-		if(isDebug()) {
-			getLogger().info(ChatColor.GREEN + "Debug");
-			getLogger().info(ChatColor.GREEN + "---");
-			
+//		if(isDebug()) {
+//			getLogger().info(ChatColor.GREEN + "Debug");
+//			getLogger().info(ChatColor.GREEN + "---");
+//			
 //			for(String value : advancement.getCriteria()) { 
 //				getLogger().info(ChatColor.GREEN + "Key/Value: " + value);
 //			}
-			
-			getLogger().info(ChatColor.GREEN + "---");
-			
-			getLogger().info(ChatColor.GREEN + "Advancement Made: " + advancementMessage);
-		}
-		
-		//event.setJoinMessage(joinText);
+//			
+//			getLogger().info(ChatColor.GREEN + "---");
+//			
+//			getLogger().info(ChatColor.GREEN + "Advancement Made: " + advancementMessage);
+//		}
 		
 		getServer().broadcastMessage(advancementMessage);
 	}
