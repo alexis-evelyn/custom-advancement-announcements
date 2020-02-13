@@ -8,7 +8,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
 
 // Third Party Imports
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -16,6 +25,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 public class Main extends JavaPlugin implements Listener {
 	private boolean debug = true;
 	private boolean essentials = false;
+	
+	private ProtocolLibHandler plib = new ProtocolLibHandler();
 	
 	// Getters and Setters
 	
@@ -39,17 +50,24 @@ public class Main extends JavaPlugin implements Listener {
 	
 	@Override
     public void onEnable() {
-		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+		if((Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) && (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)) {
 			/*
 			 * We register the EventListeners here, when PlaceholderAPI is installed.
 			 * Since all events are in the main class (this class), we simply use "this"
 			 */
+			
+			// Register Bukkit Listeners
 			Bukkit.getPluginManager().registerEvents(this, this);
+			
+			// Register ProtocolLib Listeners
+			if(!plib.registerListeners(this)) {
+				throw new RuntimeException("Failed to Implement ProtocolLib Listeners!!! Submit a Bug Report!!!");
+			}
         } else {
-            throw new RuntimeException("Could not find PlaceholderAPI!! Plugin can not work without it!");
+            throw new RuntimeException("Could not find PlaceholderAPI and/or ProtocolLib!! Plugin can not work without it!");
         }
 		
-		if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
+		if(Bukkit.getPluginManager().getPlugin("Essentials") != null) {
 			getLogger().info("Essentials Found!!! Can Use Essentials' Placeholders!!!");
 			this.setEssentials(true);
         } else {
@@ -69,7 +87,7 @@ public class Main extends JavaPlugin implements Listener {
 	}
 	
 	@SuppressWarnings("unused")
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerAdvancementDone(PlayerAdvancementDoneEvent event) {
 		Advancement advancement = event.getAdvancement();
 		String advancementMessage = ChatColor.WHITE + "%essentials_nickname%" + ChatColor.RESET + ChatColor.WHITE + " has made the advancement " + advancement.getKey().getKey() + ChatColor.RESET + ChatColor.WHITE + "!!!";
@@ -88,9 +106,9 @@ public class Main extends JavaPlugin implements Listener {
 			getLogger().info(ChatColor.GREEN + "Debug");
 			getLogger().info(ChatColor.GREEN + "---");
 			
-			for(String value : advancement.getCriteria()) { 
-				getLogger().info(ChatColor.GREEN + "Key/Value: " + value);
-			}
+//			for(String value : advancement.getCriteria()) { 
+//				getLogger().info(ChatColor.GREEN + "Key/Value: " + value);
+//			}
 			
 			getLogger().info(ChatColor.GREEN + "---");
 			
@@ -98,6 +116,7 @@ public class Main extends JavaPlugin implements Listener {
 		}
 		
 		//event.setJoinMessage(joinText);
+		
 		getServer().broadcastMessage(advancementMessage);
 	}
 }
