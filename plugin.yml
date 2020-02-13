@@ -6,6 +6,7 @@ author: Alexis Evelyn
 description: Replace Vanilla Advancement Announcements with PlaceHolderAPI Advancements
 
 depend: [PlaceholderAPI]
+softdepend: [Essentials]
 
 commands:
     announce-advancements:

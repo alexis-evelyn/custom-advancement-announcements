@@ -1,20 +1,24 @@
 package me.alexisevelyn.advancements_announcements;
 
 import org.bukkit.Bukkit;
+import org.bukkit.advancement.Advancement;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.md_5.bungee.api.ChatColor;
 
 public class Main extends JavaPlugin implements Listener {
+	private boolean debug = true;
+	private boolean essentials = false;
 	
 	@Override
     public void onEnable() {
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
 			/*
-			 * We register the EventListeneres here, when PlaceholderAPI is installed.
+			 * We register the EventListeners here, when PlaceholderAPI is installed.
 			 * Since all events are in the main class (this class), we simply use "this"
 			 */
 			Bukkit.getPluginManager().registerEvents(this, this);
@@ -22,21 +26,53 @@ public class Main extends JavaPlugin implements Listener {
             throw new RuntimeException("Could not find PlaceholderAPI!! Plugin can not work without it!");
         }
 		
+		if (Bukkit.getPluginManager().getPlugin("Essentials") != null) {
+			getLogger().info("Essentials Found!!! Can Use Essentials' Placeholders!!!");
+			this.essentials = true;
+        } else {
+            getLogger().info("Essentials Not Found!!! Cannot use Essentials Placeholder!!!");
+        }
+		
+		// Register Commands
 		this.getCommand("announce-advancements").setExecutor(new Commands());
+		
+		// Announce Successful Start
+		getLogger().info("Custom Advancements Announcements has successfully started!!!");
 	}
 	
 	@Override
     public void onDisable() {
-		
+		getLogger().info("Thank you for using the Custom Advancements Announcements plugin!!!");
 	}
 	
+	@SuppressWarnings("unused")
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onJoin(PlayerJoinEvent event) {
-		String joinText = "&f%essentials_nickname%&r&f joined the server!!!";
-
+	public void onPlayerAdvancementDone(PlayerAdvancementDoneEvent event) {
+		Advancement advancement = event.getAdvancement();
+		String advancementMessage = ChatColor.WHITE + "%essentials_nickname%" + ChatColor.RESET + ChatColor.WHITE + " has made the advancement " + advancement.getKey().getKey() + ChatColor.RESET + ChatColor.WHITE + "!!!";
+		
 		// We parse the placeholders using "setPlaceholders"
-		joinText = PlaceholderAPI.setPlaceholders(event.getPlayer(), joinText);
-
-		event.setJoinMessage(joinText);
-    }
+		advancementMessage = PlaceholderAPI.setPlaceholders(event.getPlayer(), advancementMessage);
+		
+		if(false) {
+			// Check if Advancement Gamerule is False.
+			// TODO: Do this per world for announcement.
+			// https://papermc.io/javadocs/paper/1.15/org/bukkit/GameRule.html#ANNOUNCE_ADVANCEMENTS
+			return;
+		}
+		
+		if(this.debug) {
+			getLogger().info(ChatColor.GREEN + "Debug");
+			getLogger().info(ChatColor.GREEN + "---");
+			for(String value : advancement.getCriteria()) { 
+				getLogger().info(ChatColor.GREEN + "Key/Value: " + value);
+			}
+			getLogger().info(ChatColor.GREEN + "---");
+			
+			getLogger().info(ChatColor.GREEN + "Advancement Made: " + advancementMessage);
+		}
+		
+		//event.setJoinMessage(joinText);
+		getServer().broadcastMessage(advancementMessage);
+	}
 }
